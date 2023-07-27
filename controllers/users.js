@@ -15,7 +15,6 @@ module.exports.getUserById = (req, res) => {
       if (!user) {
         return res.status(404).send({ message: 'Нет пользователя с таким id' });
       }
-
       res.status(200).send(user);
     })
     .catch((err) => {
