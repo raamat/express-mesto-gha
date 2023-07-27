@@ -8,16 +8,16 @@ const cardRoutes = require('./routes/cards');
 const app = express();
 app.use(express.json());
 
-app.use(userRoutes);
-app.use(cardRoutes);
-
 app.use((req, res, next) => {
   req.user = {
-    _id: '64bce3b56d5d6d4aa8429b83',
+    _id: '64bce2d16d5d6d4aa8429b81',
   };
 
   next();
 });
+
+app.use(userRoutes);
+app.use(cardRoutes);
 
 async function main() {
   await mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
