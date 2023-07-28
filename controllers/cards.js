@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Card = require('../models/card');
 
 module.exports.getCards = (req, res) => {
@@ -52,7 +53,7 @@ module.exports.likeCard = (req, res) => {
       res.send(card);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err instanceof mongoose.CastError) {
         return res.status(400).send({ message: 'Ошибка в введенных данных' });
       }
       res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
@@ -72,7 +73,7 @@ module.exports.dislikeCard = (req, res) => {
       res.send(card);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err instanceof mongoose.CastError) {
         return res.status(400).send({ message: 'Ошибка в введенных данных' });
       }
       res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
