@@ -20,7 +20,7 @@ module.exports.createCard = (req, res) => {
     });
 };
 
-module.exports.cardDelete = (req, res, next) => {
+module.exports.cardDelete = (req, res) => {
   const { id } = req.params;
 
   return Card.findById(id)
@@ -28,8 +28,8 @@ module.exports.cardDelete = (req, res, next) => {
       if (!card) {
         return res.status(404).send({ message: 'Нет карточки с указанным id' });
       }
-      if (card.ownwer.toString() !== req.user._id) {
-        next({ message: 'Запрещено удалять чужие карточки' });
+      if (String(card.owner) !== req.user._id) {
+        return res.send({ message: 'Запрещено удалять чужие карточки' });
       }
 
       return Card.deleteOne(card)
@@ -37,7 +37,12 @@ module.exports.cardDelete = (req, res, next) => {
           res.status(200).send({ message: 'Карточка успешно удалена' });
         });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err instanceof mongoose.CastError) {
+        return res.status(400).send({ message: 'Ошибка в введенных данных' });
+      }
+      res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
+    });
 };
 
 module.exports.likeCard = (req, res) => {
