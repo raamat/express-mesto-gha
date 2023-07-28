@@ -19,6 +19,10 @@ app.use((req, res, next) => {
 app.use(userRoutes);
 app.use(cardRoutes);
 
+app.use('*', (req, res) => {
+  res.status(404).send({ message: 'Неправильный путь' });
+});
+
 async function main() {
   await mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
     useNewUrlParser: true,
