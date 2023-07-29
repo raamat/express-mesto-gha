@@ -13,7 +13,7 @@ module.exports.createCard = (req, res) => {
   return Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(201).send(card))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err instanceof mongoose.Error.ValidationError) {
         return res.status(400).send({ message: 'Ошибка в введенных данных' });
       }
       res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });

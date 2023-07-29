@@ -1,12 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const helmet = require('helmet');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 const userRoutes = require('./routes/users');
 const cardRoutes = require('./routes/cards');
 
 const app = express();
 app.use(express.json());
+
+app.use(helmet());
 
 app.use((req, res, next) => {
   req.user = {
@@ -24,7 +27,7 @@ app.use('*', (req, res) => {
 });
 
 async function main() {
-  await mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
+  await mongoose.connect(DB_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: false,
   });
