@@ -23,6 +23,19 @@ const userSchema = new mongoose.Schema(
       },
       required: [true, 'Поле "avatar" должно быть заполнено'],
     },
+    email: {
+      type: String,
+      validate: {
+        validator: (v) => validator.isEmail(v),
+        message: 'Некорректный email',
+      },
+      required: [true, 'Поле "email" должно быть заполнено'],
+    },
+    password: {
+      type: String,
+      required: [true, 'Поле "password" должно быть заполнено'],
+      minlength: [8, 'Минимальная длина пароля - 8'],
+    },
   },
   {
     versionKey: false,
