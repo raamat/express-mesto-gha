@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 const User = require('../models/user');
 
 module.exports.getUsers = (req, res) => {
@@ -30,15 +31,18 @@ module.exports.createUser = (req, res) => {
     name, about, avatar, email, password,
   } = req.body;
 
-  return User.create({
-    name, about, avatar, email, password,
-  })
-    .then((user) => res.status(201).send(user))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: `Ошибка в введенных данных ${err}` });
-      }
-      res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
+  return bcrypt.hash(password, 10)
+    .then((hash) => {
+      User.create({
+        name, about, avatar, email, password: hash,
+      })
+        .then((user) => res.status(201).send(user))
+        .catch((err) => {
+          if (err.name === 'ValidationError') {
+            return res.status(400).send({ message: `Ошибка в введенных данных ${err}` });
+          }
+          res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
+        });
     });
 };
 

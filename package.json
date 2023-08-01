@@ -12,6 +12,7 @@
   "author": "raamat",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.0",
     "celebrate": "^15.0.1",
     "express": "^4.18.2",
     "helmet": "^7.0.0",
