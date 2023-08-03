@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
+const { generateToken, SECRET_KEY } = require('../middlewares/auth');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -43,6 +44,23 @@ module.exports.createUser = (req, res) => {
           }
           res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
         });
+    });
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const payload = { _id: user._id, email: user.email };
+      const token = generateToken(payload, SECRET_KEY, { expiresIn: '7d' });
+
+      res.status(200).send(token);
+    })
+    .catch((err) => {
+      res
+        .status(401)
+        .send({ message: err.message });
     });
 };
 
