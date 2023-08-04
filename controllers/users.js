@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const JWT = require('jsonwebtoken');
 const User = require('../models/user');
-const { generateToken, SECRET_KEY } = require('../middlewares/auth');
+
+const SECRET_KEY = 'Secret#2023%';
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -53,9 +55,9 @@ module.exports.login = (req, res) => {
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const payload = { _id: user._id, email: user.email };
-      const token = generateToken(payload, SECRET_KEY, { expiresIn: '7d' });
+      const token = JWT.sign(payload, SECRET_KEY, { expiresIn: '7d' });
 
-      res.status(200).send(token);
+      res.status(200).send({ token });
     })
     .catch((err) => {
       res

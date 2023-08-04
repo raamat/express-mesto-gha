@@ -1,9 +1,28 @@
 const JWT = require('jsonwebtoken');
 
-const SECRET_KEY = 'Secret#2023%';
+const SECRET_KEY = require('../controllers/users');
 
-function generateToken(payload) {
-  return JWT.sign(payload, SECRET_KEY);
-}
+module.exports = (req, res, next) => {
+  const { authorization } = req.headers;
 
-module.exports = { generateToken };
+  if (!authorization || !authorization.startsWith('Bearer ')) {
+    return res
+      .status(401)
+      .send({ massage: 'Необходима авторизация' });
+  }
+
+  const token = authorization.replace('Bearer ', '');
+  let payload;
+
+  try {
+    payload = JWT.verify(token, SECRET_KEY);
+  } catch (err) {
+    return res
+      .status(401)
+      .send({ message: 'Необходима авторизация' });
+  }
+
+  req.user = payload;
+
+  next();
+};
