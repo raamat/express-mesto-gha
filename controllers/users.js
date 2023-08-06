@@ -33,7 +33,11 @@ module.exports.createUser = (req, res) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-
+  // Проверка наличия пароля, иначе падает сервер
+  if (!password) {
+    res.status(401).send({ message: 'Отсутствует пароль' });
+    return;
+  }
   return bcrypt.hash(password, 10)
     .then((hash) => {
       User.create({
