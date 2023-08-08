@@ -3,6 +3,7 @@ const auth = require('../middlewares/auth');
 
 const {
   getUsers,
+  getCurrentUser,
   getUserById,
   updateUser,
   updateAvatar,
@@ -15,6 +16,7 @@ const {
 } = require('../middlewares/validations');
 
 userRoutes.get('/users', auth, getUsers);
+userRoutes.get('/users/me', auth, getCurrentUser);
 userRoutes.get('/users/:id', auth, validationGetUserById, getUserById);
 userRoutes.patch('/users/me', auth, validationUpdateUser, updateUser);
 userRoutes.patch('/users/me/avatar', auth, validationUpdateAvatar, updateAvatar);

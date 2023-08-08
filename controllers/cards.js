@@ -21,15 +21,15 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.cardDelete = (req, res) => {
-  const { id } = req.params;
+  const { cardId } = req.params;
 
-  return Card.findById(id)
+  return Card.findById(cardId)
     .then((card) => {
       if (!card) {
         return res.status(404).send({ message: 'Нет карточки с указанным id' });
       }
       if (String(card.owner) !== req.user._id) {
-        return res.send({ message: 'Запрещено удалять чужие карточки' });
+        return res.status(403).send({ message: 'Запрещено удалять чужие карточки' });
       }
 
       return Card.deleteOne(card)

@@ -11,6 +11,20 @@ module.exports.getUsers = (req, res) => {
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 };
 
+module.exports.getCurrentUser = (req, res) => User.findById(req.user._id)
+  .then((user) => {
+    if (!user) {
+      return res.status(404).send({ message: 'Пользователь не найден' });
+    }
+    res.status(200).send(user);
+  })
+  .catch((err) => {
+    if (err instanceof mongoose.CastError) {
+      return res.status(400).send({ message: 'Ошибка в введеных данных' });
+    }
+    res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
+  });
+
 module.exports.getUserById = (req, res) => {
   const { id } = req.params;
 
@@ -23,7 +37,7 @@ module.exports.getUserById = (req, res) => {
     })
     .catch((err) => {
       if (err instanceof mongoose.CastError) {
-        return res.status(400).send({ message: ' Ошибка в введеных данных' });
+        return res.status(400).send({ message: 'Ошибка в введеных данных' });
       }
       res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
     });

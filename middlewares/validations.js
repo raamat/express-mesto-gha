@@ -61,9 +61,9 @@ const validationCreateCard = celebrate({
   }),
 });
 
-const validationCardDelete = celebrate({
+const validationCardId = celebrate({
   params: Joi.object().keys({
-    id: Joi
+    cardId: Joi
       .string()
       .hex()
       .message('Идентификатор карточки должен быть в 16-ричной системе')
@@ -79,5 +79,5 @@ module.exports = {
   validationUpdateUser,
   validationUpdateAvatar,
   validationCreateCard,
-  validationCardDelete,
+  validationCardId,
 };
