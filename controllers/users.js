@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const JWT = require('jsonwebtoken');
 const User = require('../models/user');
 
-const SECRET_KEY = 'Secret#2023%';
+const { SECRET_KEY } = require('../utils/constants');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -39,10 +39,19 @@ module.exports.createUser = (req, res) => {
       User.create({
         name, about, avatar, email, password: hash,
       })
-        .then((user) => res.status(201).send(user))
+        .then((user) => res.status(201).send({
+          _id: user._id,
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
+          email: user.email,
+        }))
         .catch((err) => {
           if (err.name === 'ValidationError') {
             return res.status(400).send({ message: `Ошибка в введенных данных ${err}` });
+          }
+          if (err.code === 11000) {
+            return res.status(409).send({ message: 'Пользователь с таким email уже зарегистрирован' });
           }
           res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
         });
