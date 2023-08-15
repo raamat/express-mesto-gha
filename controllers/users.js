@@ -13,7 +13,6 @@ const { SECRET_KEY } = require('../utils/constants');
 module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(200).send(users))
-    // .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
     .catch(() => next(new ServerError()));
 };
 
@@ -26,10 +25,8 @@ module.exports.getCurrentUser = (req, res, next) => User.findById(req.user._id)
   })
   .catch((err) => {
     if (err instanceof mongoose.CastError) {
-      // return res.status(400).send({ message: 'Ошибка в введеных данных' });
       return next(new BadRequestError());
     }
-    // res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
     next(err);
   });
 
@@ -39,17 +36,14 @@ module.exports.getUserById = (req, res, next) => {
   return User.findById(id)
     .then((user) => {
       if (!user) {
-        // return res.status(404).send({ message: 'Нет пользователя с таким id' });
         return next(new NotFoundError('Нет пользователя с таким id'));
       }
       res.status(200).send(user);
     })
     .catch((err) => {
       if (err instanceof mongoose.CastError) {
-        // return res.status(400).send({ message: 'Ошибка в введеных данных' });
         return next(new BadRequestError());
       }
-      // res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
       next(err);
     });
 };
@@ -73,14 +67,11 @@ module.exports.createUser = (req, res, next) => {
         }))
         .catch((err) => {
           if (err.name === 'ValidationError') {
-            // return res.status(400).send({ message: `Ошибка в введенных данных ${err}` });
             return next(new BadRequestError());
           }
-          if (err.code === 1100) {
-            // return res.status(409).send({ message: 'Польз с таким email уже зарегистрирован' });
+          if (err.code === 11000) {
             return next(new ConflictError());
           }
-          // res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
           next(err);
         });
     });
@@ -96,11 +87,6 @@ module.exports.login = (req, res, next) => {
 
       res.status(200).send({ token });
     })
-    // .catch((err) => {
-    //  res
-    //    .status(401)
-    //    .send({ message: err.message });
-    // });
     .catch(() => next(new AuthenticationError()));
 };
 
@@ -113,14 +99,11 @@ module.exports.updateUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        // return res.status(400).send({ message: 'Ошибка в введенных данных' });
         return next(new BadRequestError());
       }
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        // return res.status(404).send({ message: 'Нет пользователя с таким id' });
         return next(new NotFoundError('Нет пользователя с таким id'));
       }
-      // res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
       next(err);
     });
 };
@@ -130,17 +113,14 @@ module.exports.updateAvatar = (req, res, next) => {
   return User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        // return res.status(404).send({ message: 'Нет пользователя с таким id' });
         return next(new NotFoundError('Нет пользователя с таким id'));
       }
       res.status(200).send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        // return res.status(400).send({ message: `Ошибка в введенных данных ${err}` });
         next(new BadRequestError());
       }
-      // res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
       next();
     });
 };

@@ -2,7 +2,9 @@ class BadRequestError extends Error {
   constructor(message) {
     super(message);
     this.statusCode = 400;
-    this.message = 'Ошибка в введеных данных';
+    if (!this.message) {
+      this.message = 'Ошибка в введеных данных';
+    }
   }
 }
 
