@@ -1,35 +1,44 @@
 const mongoose = require('mongoose');
 const Card = require('../models/card');
+const BadRequestError = require('../errors/BadRequestError');
+const ForbiddenError = require('../errors/ForbiddenError');
+const NotFoundError = require('../errors/NotFoundError');
+const ServerError = require('../errors/ServerError');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка в работе сервера' }));
+    // .catch(() => res.status(500).send({ message: 'Произошла ошибка в работе сервера' }));
+    .catch(() => next(new ServerError()));
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   return Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(201).send(card))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        return res.status(400).send({ message: 'Ошибка в введенных данных' });
+        // return res.status(400).send({ message: 'Ошибка в введенных данных' });
+        return next(new BadRequestError());
       }
-      res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
+      // res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
+      next(err);
     });
 };
 
-module.exports.cardDelete = (req, res) => {
+module.exports.cardDelete = (req, res, next) => {
   const { cardId } = req.params;
 
   return Card.findById(cardId)
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: 'Нет карточки с указанным id' });
+        // return res.status(404).send({ message: 'Нет карточки с указанным id' });
+        return next(new NotFoundError('Нет карточки с указанным id'));
       }
       if (String(card.owner) !== req.user._id) {
-        return res.status(403).send({ message: 'Запрещено удалять чужие карточки' });
+        // return res.status(403).send({ message: 'Запрещено удалять чужие карточки' });
+        return next(new ForbiddenError());
       }
 
       return Card.deleteOne(card)
@@ -39,13 +48,15 @@ module.exports.cardDelete = (req, res) => {
     })
     .catch((err) => {
       if (err instanceof mongoose.CastError) {
-        return res.status(400).send({ message: 'Ошибка в введенных данных' });
+        // return res.status(400).send({ message: 'Ошибка в введенных данных' });
+        return next(new BadRequestError());
       }
-      res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
+      // res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
+      next(err);
     });
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
@@ -53,19 +64,22 @@ module.exports.likeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: 'Нет карточки с указанным id' });
+        // return res.status(404).send({ message: 'Нет карточки с указанным id' });
+        return next(new NotFoundError('Нет карточки с указанным id'));
       }
       res.send(card);
     })
     .catch((err) => {
       if (err instanceof mongoose.CastError) {
-        return res.status(400).send({ message: 'Ошибка в введенных данных' });
+        // return res.status(400).send({ message: 'Ошибка в введенных данных' });
+        return next(new BadRequestError());
       }
-      res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
+      // res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
+      next(err);
     });
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
@@ -73,14 +87,17 @@ module.exports.dislikeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: 'Нет карточки с указанным id' });
+        // return res.status(404).send({ message: 'Нет карточки с указанным id' });
+        return next(new NotFoundError('Нет карточки с указанным id'));
       }
       res.send(card);
     })
     .catch((err) => {
       if (err instanceof mongoose.CastError) {
-        return res.status(400).send({ message: 'Ошибка в введенных данных' });
+        // return res.status(400).send({ message: 'Ошибка в введенных данных' });
+        return next(new BadRequestError());
       }
-      res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
+      // res.status(500).send({ message: `Произошла ошибка в работе сервера ${err}` });
+      next(err);
     });
 };

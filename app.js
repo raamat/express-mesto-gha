@@ -8,6 +8,7 @@ const userRoutes = require('./routes/users');
 const cardRoutes = require('./routes/cards');
 const { createUser, login } = require('./controllers/users');
 const { validationCreateUser, validationLogin } = require('./middlewares/validations');
+const handleErrors = require('./middlewares/handleErrors');
 
 const app = express();
 app.use(express.json());
@@ -25,6 +26,12 @@ app.use('*', (req, res) => {
 });
 
 app.use(errors());
+
+// app.use((err, req, res, next) => {
+// res.status(err.statusCode).send({ message: err.message });
+// });
+
+app.use(handleErrors);
 
 async function main() {
   await mongoose.connect(DB_URL, {
