@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const validator = require('validator');
 
+const AuthenticationError = require('../errors/AuthenticationError');
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -36,7 +38,6 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, 'Поле "password" должно быть заполнено'],
-      minlength: [8, 'Минимальная длина пароля - 8'],
       select: false,
     },
   },
@@ -46,18 +47,17 @@ const userSchema = new mongoose.Schema(
 );
 
 // Cделаем код проверки почты и пароля частью схемы User
-// eslint-disable-next-line func-names
 userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('Неправильные почта или пароль'));
+        return Promise.reject(new AuthenticationError('Неправильные почта или пароль'));
       }
 
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new Error('Неправильные почта или пароль'));
+            return Promise.reject(new AuthenticationError('Неправильные почта или пароль'));
           }
 
           return user;

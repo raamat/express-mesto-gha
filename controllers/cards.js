@@ -3,12 +3,11 @@ const Card = require('../models/card');
 const BadRequestError = require('../errors/BadRequestError');
 const ForbiddenError = require('../errors/ForbiddenError');
 const NotFoundError = require('../errors/NotFoundError');
-const ServerError = require('../errors/ServerError');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch(() => next(new ServerError()));
+    .catch(next);
 };
 
 module.exports.createCard = (req, res, next) => {
@@ -18,7 +17,7 @@ module.exports.createCard = (req, res, next) => {
     .then((card) => res.status(201).send(card))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        return next(new BadRequestError());
+        return next(new BadRequestError('Ошибка в введеных данных'));
       }
       next(err);
     });
@@ -33,17 +32,16 @@ module.exports.cardDelete = (req, res, next) => {
         return next(new NotFoundError('Нет карточки с указанным id'));
       }
       if (String(card.owner) !== req.user._id) {
-        return next(new ForbiddenError());
+        return next(new ForbiddenError('Запрещено удалять чужие карточки'));
       }
 
-      return Card.deleteOne(card)
-        .then(() => {
-          res.status(200).send({ message: 'Карточка успешно удалена' });
-        });
+      return Card.deleteOne(card).then(() => {
+        res.status(200).send({ message: 'Карточка успешно удалена' });
+      });
     })
     .catch((err) => {
       if (err instanceof mongoose.CastError) {
-        return next(new BadRequestError());
+        return next(new BadRequestError('Ошибка в введеных данных'));
       }
       next(err);
     });
@@ -63,7 +61,7 @@ module.exports.likeCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err instanceof mongoose.CastError) {
-        return next(new BadRequestError());
+        return next(new BadRequestError('Ошибка в введеных данных'));
       }
       next(err);
     });
@@ -83,7 +81,7 @@ module.exports.dislikeCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err instanceof mongoose.CastError) {
-        return next(new BadRequestError());
+        return next(new BadRequestError('Ошибка в введеных данных'));
       }
       next(err);
     });

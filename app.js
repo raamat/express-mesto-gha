@@ -4,27 +4,15 @@ const helmet = require('helmet');
 
 const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 const { errors } = require('celebrate');
-const userRoutes = require('./routes/users');
-const cardRoutes = require('./routes/cards');
-const NotFoundError = require('./errors/NotFoundError');
-const { createUser, login } = require('./controllers/users');
-const { validationCreateUser, validationLogin } = require('./middlewares/validations');
+const router = require('./routes/index');
 const handleErrors = require('./middlewares/handleErrors');
 
 const app = express();
 app.use(express.json());
 
-app.post('/signin', validationLogin, login);
-app.post('/signup', validationCreateUser, createUser);
-
 app.use(helmet());
 
-app.use(userRoutes);
-app.use(cardRoutes);
-
-app.use('*', (req, res, next) => {
-  next(new NotFoundError('Неправильный путь'));
-});
+app.use(router);
 
 app.use(errors());
 
